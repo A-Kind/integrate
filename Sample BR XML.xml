@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload unload_date="2018-10-29 09:38:23">
+<sys_script action="INSERT_OR_UPDATE">
+<abort_action>false</abort_action>
+<access>package_private</access>
+<action_delete>false</action_delete>
+<action_insert>true</action_insert>
+<action_query>false</action_query>
+<action_update>true</action_update>
+<active>true</active>
+<add_message>false</add_message>
+<advanced>true</advanced>
+<change_fields>false</change_fields>
+<client_callable>false</client_callable>
+<collection>sys_embedded_tour_guide</collection>
+<condition/>
+<description/>
+<execute_function>false</execute_function>
+<filter_condition table="sys_embedded_tour_guide"/>
+<is_rest>false</is_rest>
+<message/>
+<name> GTD Tour Name and Page Name Validation</name>
+<order>100</order>
+<priority>100</priority>
+<rest_method display_value=""/>
+<rest_method_text/>
+<rest_service display_value=""/>
+<rest_service_text/>
+<rest_variables/>
+<role_conditions/>
+<script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+	
+	var _tbr = new sn_tourbuilder.TourBuilderRecorder();
+	var tourName = current.name.toString();
+	var tourType = current.type.toString();
+	var tourRoles = current.roles;
+	var tourURL = current.context.toString();
+	var spPortal = current.sp_portal;
+	var spPage = current.sp_page;
+	var resultObj={};
+	var checkForUniqueName = true;
+	var parentTourName = '';
+	var tourSysId = '';
+	var prevTourName = '';
+	
+	if(current.operation()=='insert'){
+		if(current.getValue("sys_overrides")!=null && current.getValue("sys_overrides").toString()!=''){
+			parentTourName = current.sys_overrides.name.toString();
+			
+			if(tourName === parentTourName)
+				checkForUniqueName = false;
+		}
+		
+		resultObj = _tbr.validateTour(tourName,tourURL,tourType,spPortal,spPage,true,'',checkForUniqueName);
+	}else if(current.operation()=='update'){
+		
+		tourSysId = current.sys_id;
+		prevTourName = previous.name.toString();
+		
+		if(tourName === prevTourName)
+			checkForUniqueName = false;
+		
+		resultObj = _tbr.validateTour(tourName,tourURL,tourType,spPortal,spPage,false,current.sys_id,checkForUniqueName);
+	}
+		
+	
+	if(resultObj.status === 'error'){
+		var error_message = resultObj.validationMessage;
+		if(error_message.indexOf('page_error:') == -1) //validation failed for tour name only
+			gs.addErrorMessage(error_message.substring(11));
+		else if (error_message.indexOf('page_error:') == 0) //validation failed for page name only
+			gs.addErrorMessage(error_message.substring(11));
+		else{ //validation failed for both page and tour name
+			gs.addErrorMessage(error_message.substring(11, error_message.indexOf('page_error:')));
+			gs.addErrorMessage(error_message.substring((error_message.indexOf('page_error:') + 11)));
+		}
+		
+		current.setAbortAction(true);
+	}
+	
+})(current, previous);]]></script>
+<sys_class_name>sys_script</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2018-04-08 21:28:23</sys_created_on>
+<sys_domain>global</sys_domain>
+<sys_domain_path>/</sys_domain_path>
+<sys_id>acf11066731113008f58edcc5ef6a769</sys_id>
+<sys_mod_count>42</sys_mod_count>
+<sys_name> GTD Tour Name and Page Name Validation</sys_name>
+<sys_overrides display_value=""/>
+<sys_package display_value="Guided Tours" source="com.glide.guided_tours">c9bb6156bcc02300aadb875973a34b1e</sys_package>
+<sys_policy/>
+<sys_scope display_value="Global">global</sys_scope>
+<sys_update_name>sys_script_acf11066731113008f58edcc5ef6a769</sys_update_name>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2018-07-13 06:49:13</sys_updated_on>
+<template/>
+<when>before</when>
+</sys_script>
+</unload>
